@@ -13,7 +13,7 @@ def build_renames(source_basename, species, start_number, target_number)
 	    id = Integer($1)
 	    if id >= start_number
 		ext = File.extname(file)
-		renames[id] = [file, "#{species}_#{id - start_number + target_number}#{ext}"]
+		renames["#{id}#{ext}"] = [file, "#{species}_#{id - start_number + target_number}#{ext}"]
 	    else
 		ignored << file
 	    end
