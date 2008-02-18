@@ -1,0 +1,22 @@
+#! /usr/bin/ruby
+
+$LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
+require 'formats'
+require 'tempfile'
+
+Dir.glob('*') do |file|
+    if File.file?(file)
+	if is_fasta?(file)
+	    input  = File.open(file)
+	    input.readline
+	    File.open("#{file}.new", 'w') do |output|
+		output.puts ">#{File.basename(file)}"
+		output.write input.read
+	    end
+
+	    FileUtils.rm_f input
+	    FileUtils.mv output, input
+	end
+    end
+end
+
