@@ -12,7 +12,7 @@ Dir.glob('*') do |file|
 	    input.readline
 
 	    output_name = "#{file}.new"
-	    seq_name = File.basename(file, File.dirname(file)).
+	    seq_name = File.basename(file, File.extname(file)).
 		gsub(/_/, '')
 	    File.open(output_name, 'w') do |output|
 		output.puts ">#{seq_name}"
