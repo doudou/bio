@@ -40,9 +40,9 @@ end
 
 def seq_rename
     source_basename = ask('source name ?')
-    species       = ask('species name ?')
-    start_number  = Integer(ask('start number ?'))
-    target_number = Integer(ask('target number ?'))
+    species       = ask('target name ?')
+    start_number  = Integer(ask('source start number ?'))
+    target_number = Integer(ask('target start number ?'))
 
     renames, ignored = build_renames(source_basename, species, start_number, target_number)
 
