@@ -9,10 +9,11 @@ def build_renames(source_basename, species, start_number, target_number)
     renames = Hash.new
     ignored = []
     Dir.glob("#{source_basename}_*") do |file|
-	if File.basename(file) =~ /^#{source_basename}_(\d+)_/
+	if File.basename(file) =~ /^#{source_basename}_(\d+)/
 	    id = Integer($1)
 	    if id >= start_number
-		renames[id] = [file, "#{species}_#{id - start_number + target_number}"]
+		ext = File.extname(file)
+		renames[id] = [file, "#{species}_#{id - start_number + target_number}#{ext}"]
 	    else
 		ignored << file
 	    end
@@ -60,5 +61,8 @@ def seq_rename
 	    perform_rename(logfile, renames)
 	end
     end
+
+rescue Interrupt
+    puts "Interrupted"
 end
 
