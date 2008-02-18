@@ -24,21 +24,27 @@ class TC_SeqRename < Test::Unit::TestCase
     def test_build_renames
 	Dir.chdir(workdir) do
 	    result, ignored = build_renames 'caro', 'OsmuTD3', 1, 10
-	    assert_equal(15, result.size)
+	    assert_equal(16, result.size)
 	    assert(ignored.empty?)
 
-	    expected_result = TEST_SEQUENCE_IDS.inject(Hash.new) do |expected_result, id|
-		expected_result[id] = ["caro_#{id}_blablo", "OsmuTD3_#{id + 9}"]
-		expected_result
+	    expected_result = Hash.new
+	    expected_result["10.1"] = ["caro_10_blablo.1", "OsmuTD3_19.1"]
+	    expected_result["10.2"] = ["caro_10_blablo.2", "OsmuTD3_19.2"]
+	    TEST_SEQUENCE_IDS.each do |id|
+		next if id == 10
+		expected_result[id.to_s] = ["caro_#{id}_blablo", "OsmuTD3_#{id + 9}"]
 	    end
 	    assert_equal(expected_result, result)
 
 	    result, ignored = build_renames 'caro', 'OsmuTD4', 8, 2
-	    expected_result = TEST_SEQUENCE_IDS.inject(Hash.new) do |expected_result, id|
-		if id >= 8
-		    expected_result[id] = ["caro_#{id}_blablo", "OsmuTD4_#{id - 6}"]
+
+	    expected_result = Hash.new
+	    expected_result["10.1"] = ["caro_10_blablo.1", "OsmuTD4_4.1"]
+	    expected_result["10.2"] = ["caro_10_blablo.2", "OsmuTD4_4.2"]
+	    TEST_SEQUENCE_IDS.each do |id|
+		if id >= 8 && id != 10
+		    expected_result[id.to_s] = ["caro_#{id}_blablo", "OsmuTD4_#{id - 6}"]
 		end
-		expected_result
 	    end
 	    assert_equal(expected_result, result)
 	    assert_equal(5, ignored.size)
@@ -57,9 +63,13 @@ class TC_SeqRename < Test::Unit::TestCase
 	    end
 
 	    expected_filelist = Set.new
-	    expected_result = TEST_SEQUENCE_IDS.inject(Hash.new) do |expected_result, id|
-		if id >= 8
-		    expected_result[id] = ["caro_#{id}_blablo", "OsmuTD4_#{id - 6}"]
+	    expected_result = Hash.new
+	    expected_result["10.1"] = ["caro_10_blablo.1", "OsmuTD4_4.1"]
+	    expected_result["10.2"] = ["caro_10_blablo.2", "OsmuTD4_4.2"]
+	    TEST_SEQUENCE_IDS.each do |id|
+		next if id == 10
+		if id >= 8 
+		    expected_result[id.to_s] = ["caro_#{id}_blablo", "OsmuTD4_#{id - 6}"]
 		else
 		    expected_filelist << "caro_#{id}_blablo"
 		end
