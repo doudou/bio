@@ -3,19 +3,24 @@
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
 require 'formats'
 require 'tempfile'
+require 'fileutils'
 
 Dir.glob('*') do |file|
     if File.file?(file)
 	if is_fasta?(file)
 	    input  = File.open(file)
 	    input.readline
-	    File.open("#{file}.new", 'w') do |output|
-		output.puts ">#{File.basename(file)}"
+
+	    output_name = "#{file}.new"
+	    seq_name = File.basename(file, File.dirname(file)).
+		gsub(/_/, '')
+	    File.open(output_name, 'w') do |output|
+		output.puts ">#{seq_name}"
 		output.write input.read
 	    end
 
-	    FileUtils.rm_f input
-	    FileUtils.mv output, input
+	    FileUtils.rm_f file
+	    FileUtils.mv output_name, file
 	end
     end
 end
