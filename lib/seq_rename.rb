@@ -57,7 +57,7 @@ def seq_rename
     end
 
     if ask('Is that OK ?', false)
-	File.open("#{ENV['HOME']}/.caro_tools.log", 'a') do |logfile|
+	File.open("renames.log", 'a') do |logfile|
 	    perform_rename(logfile, renames)
 	end
     end
