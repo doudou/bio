@@ -26,7 +26,9 @@ end
 def perform_rename(logfile, renames)
     logfile.puts
     logfile.puts "starting to rename at #{Time.now}"
-    renames.each_value do |source, target|
+
+    renames = renames.values_at(*renames.keys.sort)
+    renames.each do |source, target|
 	logfile.puts "  #{source} => #{target}"
 	FileUtils.mv source, target
     end
@@ -46,15 +48,16 @@ def seq_rename
 
     renames, ignored = build_renames(source_basename, species, start_number, target_number)
 
-    puts "Found #{renames.size} renames:"
     if !ignored.empty?
 	puts "Ignored #{ignored.size} files:"
 	puts "  " + ignored.join("\n  ")
     end
-    renames.keys.sort.each do |source_id|
-	source, target = renames[source_id]
-	puts "  #{source} => #{target}"
-    end
+    puts "Found #{renames.size} renames:"
+    renames.
+	values_at(*renames.keys.sort).
+	each do |source, target|
+	    puts "  #{source} => #{target}"
+	end
 
     if ask('Is that OK ?', false)
 	File.open("renames.log", 'a') do |logfile|
