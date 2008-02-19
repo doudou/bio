@@ -5,15 +5,15 @@ require 'formats'
 require 'tempfile'
 require 'fileutils'
 
-Dir.glob('*') do |file|
+fasta_count = 0
+Dir.glob(ARGV[0] || '*') do |file|
     if File.file?(file)
 	if is_fasta?(file)
 	    input  = File.open(file)
 	    input.readline
 
 	    output_name = "#{file}.new"
-	    seq_name = File.basename(file, File.extname(file)).
-		gsub(/_/, '')
+	    seq_name = File.basename(file, File.extname(file))
 	    File.open(output_name, 'w') do |output|
 		output.puts ">#{seq_name}"
 		output.write input.read
@@ -21,7 +21,12 @@ Dir.glob('*') do |file|
 
 	    FileUtils.rm_f file
 	    FileUtils.mv output_name, file
+	    fasta_count += 1
+	else
+	    puts "#{file} is not a FASTA file"
+
 	end
     end
 end
+puts "Fixed #{fasta_count} files"
 
