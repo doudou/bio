@@ -8,7 +8,7 @@ class TC_Formats < Test::Unit::TestCase
     def test_is_fasta
     	Dir.chdir(File.join(BASEDIR, "fasta_set")) do
 	    Dir.glob('*') do |file|
-	    	assert(is_fasta?(file))
+	    	assert(is_fasta?(file), file)
 	    end
 	end
     end
