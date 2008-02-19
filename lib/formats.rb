@@ -4,7 +4,7 @@ def is_fasta?(file)
 	
 	while !io.eof?
 	    line = io.readline.chomp
-	    return false if line !~ /^[A-Za-z\-]+$/
+	    return false if line !~ /^[A-Za-z\-:]+$/
 
 	    if line.size != 50
 		return (io.eof? || io.read =~ /^\n*$/)
