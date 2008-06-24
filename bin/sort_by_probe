@@ -1,0 +1,34 @@
+#! /usr/bin/env ruby
+
+require 'find'
+require 'fileutils'
+PROBE_NAMES = /^(gam|sym|eub|non)/i
+
+classifier = Hash.new { |h, k| h[k] = Array.new }
+Find.find('.') do |path|
+    next unless path.downcase =~ /\.jpg$/
+    
+    parts = File.basename(path).split('_')
+    if probe_name = parts.find { |p| PROBE_NAMES =~ p }
+        classifier[probe_name.downcase] << path
+    end
+end
+
+if ARGV.first
+    classifier.keys.sort.each do |probe|
+        FileUtils.mkdir(probe)
+        classifier[probe].each do |path|
+            FileUtils.cp path, probe
+        end
+    end
+    
+else
+    STDERR.puts "Simulation mode. Give the 'doit' option to actually copy"
+    classifier.keys.sort.each do |probe|
+        puts probe
+        classifier[probe].each do |path|
+            puts "  #{path}"
+        end
+    end
+end
+
