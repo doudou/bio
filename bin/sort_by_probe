@@ -2,6 +2,7 @@
 
 require 'find'
 require 'fileutils'
+require 'set'
 
 PROBE_NAMES = /^(gam|sym|eub|non)/i
 COLORS = {
@@ -11,11 +12,22 @@ COLORS = {
 }
 
 classifier = Hash.new { |h, k| h[k] = Hash.new { |h, k| h[k] = Array.new } }
+all_files  = Hash.new 
+
 Find.find(ARGV.first || '.') do |path|
     next unless path.downcase =~ /\.jpg$/
     
-    parts      = File.basename(path.downcase, '.jpg').split('_')
+    basename = File.basename(path.downcase, '.jpg')
+    parts      = basename.split('_')
     if probe_name = parts.find { |p| PROBE_NAMES =~ p }
+        if all_files.has_key?(basename)
+            STDERR.puts "Name collision on #{basename}:"
+            STDERR.puts "  #{path}"
+            STDERR.puts "  #{all_files[basename]}"
+            exit(1)
+        end
+        all_files[basename] = path
+
         color_name = parts.last
         COLORS.each do |src, dst|
             color_name = color_name.gsub(src, dst)
