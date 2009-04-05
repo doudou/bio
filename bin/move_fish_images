@@ -1,0 +1,11 @@
+#! /bin/sh
+
+find -iname '*.zvi' | while read zvi; do
+    basedir=$(dirname $zvi)
+    imagedir=$(basename $zvi)
+    if test -d $imagedir; then
+        echo "moving contents of $imagedir into $basedir"
+        mv $imagedir/* $basedir
+    fi
+done
+
