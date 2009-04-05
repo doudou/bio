@@ -5,13 +5,15 @@ require 'formats'
 require 'tempfile'
 require 'fileutils'
 
-if !ARGV[0]
+if !ARGV[0] || !ARGV[1]
     STDERR.puts "usage: fasta2tcs source \"title\" [dest]"
+    STDERR.puts "Converts a sequence in FASTA format in the TCS format,"
+    STDERR.puts "inserting the given sequence name"
     exit 1
 end
 
 src   = ARGV[0]
-title = ARGV[1] || src
+title = ARGV[1]
 
 if ARGV[2]
     dest = ARGV[2]
