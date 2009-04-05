@@ -1,0 +1,43 @@
+#! /usr/bin/env ruby
+
+if !ARGV[0] || !ARGV[1]
+    STDERR.puts "usage: matrix_ops \"operation\" file"
+    STDERR.puts "applies the given operation on all values of the matrix"
+    STDERR.puts "contained in the given file, and outputs the result"
+    STDERR.puts "examples:"
+    STDERR.puts "  matrix_ops \"1-x\" distance_mat.txt > distance_mat_new.txt"
+    STDERR.puts "  matrix_ops \"2*x\" distance_mat.txt > distance_mat_new.txt"
+    STDERR.puts "  matrix_ops \"2*Math.exp(x)\" distance_mat.txt > distance_mat_new.txt"
+    exit 1
+end
+
+eval <<-EOD
+def op(x)
+    #{ARGV[0]}
+end
+EOD
+
+data = File.read(ARGV[1])
+if data[0] == 0xFF
+    # UTF16 data, convert to UTF8 first
+    data = `iconv -f utf16 -t utf8 #{ARGV[1]}`
+end
+
+data.each_line do |line|
+    line = line.chomp
+    if line =~ /^(\[\s*\d+\] ) /
+        header = $1
+        values = $'
+        values.gsub! ",", "."
+
+        print header
+        values.split(/\s+/).each do |v|
+            print " %.3f" % [op(Float(v))]
+        end
+        puts
+    else
+        puts line
+    end
+end
+
+
