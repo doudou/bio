@@ -22,6 +22,7 @@ else
     if dest == src
         dest = src + ".txt"
     end
+    puts "writing result to #{dest}"
 end
 
 if File.exists?(dest)
@@ -30,7 +31,12 @@ if File.exists?(dest)
 end
 
 data = read_fasta src
-File.open dest, 'w' do |io|
-    write_tcs title, data, io
+begin
+    File.open dest, 'w' do |io|
+        write_tcs title, data, io
+    end
+rescue Exception
+    FileUtils.rm_f dest
+    raise
 end
 
