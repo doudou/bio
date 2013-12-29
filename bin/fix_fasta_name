@@ -1,5 +1,15 @@
 #! /usr/bin/ruby
 
+if !ARGV[0] || !ARGV[1]
+    STDERR.puts "usage: fix_fasta_name glob"
+    STDERR.puts "Updates the fasta files so that the sequence name inside the file matches the"
+    STDERR.puts "file's basename"
+    STDERR.puts ""
+    STDERR.puts "If called without arguments, processes all files in the current directory.:"
+    STDERR.puts "Otherwise, processes the glob given as argument"
+    exit 1
+end
+
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
 require 'formats'
 require 'tempfile'
