@@ -28,20 +28,31 @@ def is_fasta?(file)
     line_size = nil
     File.open(file) do |io|
 	return false if io.readline !~ /^>/
+        last_line_size_mismatch = false
 	
 	while !io.eof?
 	    line = io.readline.chomp
             if line =~ /^>/
                 # New sequence, skip
+                last_line_size_mismatch = false
                 next
+            elsif line =~ /^\n*$/
+                last_line_size_mismatch = false
+                next
+            elsif last_line_size_mismatch
+		return false
             end
 
 	    return false if line !~ /^[A-Za-z\-:]*$/
 
-	    if line_size && line.size != line_size
-		return (io.eof? || io.read =~ /^\n*$/)
+	    if line_size
+                if line.size != line_size
+                    return true if io.eof?
+                    last_line_size_mismatch = true
+                end
+            else
+                line_size = line.size
 	    end
-	    line_size = line.size
 	end
 	return true
     end
