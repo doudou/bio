@@ -67,6 +67,7 @@ def write_tcs(title, sequences, io)
     namewidth = sequences.map { |name, _| name.size }.max
 
     sequences.each do |name, data|
+        name.gsub! /[^\w]/, '_'
         if data.size != seqlength
             raise ArgumentError, "sequence data mismatch: #{name} has #{data.size} bases instead of #{seqlength}"
         end
