@@ -71,9 +71,9 @@ def write_tcs(title, sequences, io)
         if data.size != seqlength
             raise ArgumentError, "sequence data mismatch: #{name} has #{data.size} bases instead of #{seqlength}"
         end
-        if data =~ /[U]/
-            bad = (data =~ /[U]/)
-            raise ArgumentError, "#{name} contains U (character #{bad})"
+        if data =~ /([^ACGTacgt\.\?\-RMWSKYHBVDXN])/
+            bad = $1
+            raise ArgumentError, "#{name} contains invalid caracters (found #{bad})"
         end
     end
 
