@@ -22,8 +22,8 @@ else
     if dest == src
         dest = src + ".txt"
     end
-    puts "writing result to #{dest}"
 end
+puts "writing result to #{dest}"
 
 if File.exists?(dest)
     STDERR.puts "destination #{dest} already exists"
