@@ -1,5 +1,12 @@
 #! /usr/bin/env ruby
 
+if ARGV.empty?
+    puts "batch_rename_nexus_sequences mapping_file nexus_file"
+    puts "  mapping_file: fichier dont la premiere colonne est le nom de sequence a remplacer, le reste est le nouveau nom"
+    puts "  nexus_file: fichier nexus a traiter"
+    exit 1
+end
+
 name_mapping_file = ARGV.shift
 nexus_file = ARGV.shift
 
