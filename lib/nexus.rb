@@ -109,18 +109,18 @@ class NexusProcessing
             end
         end
 
-        dirname = path.gsub(/\.nexus$/, '')
+        dirname = path.gsub(/\.nex(?:us)?$/, '')
         FileUtils.mkdir_p dirname
         # Add annotation blocks for the traits
         traits.each_value do |trait|
-            File.open(File.join(dirname, "#{trait.name}.nexus"), 'w') do |io|
+            File.open(File.join(dirname, "#{trait.name}.nex"), 'w') do |io|
                 io.puts base_file.string
                 make_trait_block(io, trait, sequence_names)
             end
         end
 
         # And if we have lat/lon, make a geotag block
-        File.open(File.join(dirname, "geotags.nexus"), 'w') do |io|
+        File.open(File.join(dirname, "geotags.nex"), 'w') do |io|
             io.puts base_file.string
             make_geotags_block(io, sequence_names)
         end
