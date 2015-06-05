@@ -25,6 +25,7 @@ class NexusProcessing
 
     def add_trait(name, keys, trait)
         trait_values = trait.sort_by { |v| v || "" }.uniq
+        trait_values.delete('?')
 
         mapping = Hash[trait_values.each_with_index.map { |v, i| [v, i] }]
         trait = trait.map { |v| mapping[v] }
