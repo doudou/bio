@@ -145,7 +145,7 @@ class NexusProcessing
                 io.puts "#{sequence_key_mapping[seq_name]} #{trait_array.join(",")}"
                 trait_array[trait_value] = "0"
             else
-                io.puts "#{sequence_key_mapping[seq_name]} #{(['?'] * trait.categories.size).join(",")}"
+                raise "no data for sequence #{seq_name}"
             end
         end
         io.puts ";"
@@ -163,7 +163,7 @@ class NexusProcessing
             if seq_latlon = latlon[seq_name]
                 io.puts "#{sequence_key_mapping[seq_name]} #{seq_latlon[0]},#{seq_latlon[1]},1"
             else
-                io.puts "#{sequence_key_mapping[seq_name]} ?,?,1"
+                raise "no data for sequence #{seq_name}"
             end
         end
         io.puts ";"
