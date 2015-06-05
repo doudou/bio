@@ -102,8 +102,10 @@ class NexusProcessing
                 base_file.print line
             elsif line.downcase.strip == "begin data;"
                 in_data_block = true
+                base_file.print line
             elsif in_data_block && line.downcase.strip == "end;"
                 in_data_block, in_data_matrix = false
+                base_file.print line
             else
                 base_file.print line
             end
