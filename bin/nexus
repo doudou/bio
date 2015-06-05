@@ -1,0 +1,52 @@
+#! /usr/bin/env ruby
+
+require 'csv'
+require 'pp'
+require 'nexus'
+require 'yaml'
+require 'fileutils'
+
+# Config file:
+#
+# key: KEY_NAME
+# [lat: LAT_NAME]
+# [long: LONG_NAME]
+# [traits:
+#   - TRAIT1_NAME
+#   - TRAIT2_NAME]
+
+if ARGV.empty?
+    puts "nexus NEXUS_FILE CONFIG_FILE"
+    exit 0
+end
+
+nexus_file  = ARGV.shift
+config_path = ARGV.shift
+
+config = YAML.load(File.read(config_path))
+base_dir = File.dirname(config_path)
+key_col_name  = config.delete('key')
+lat_col_name  = config.delete('lat')
+lon_col_name  = config.delete('lon')
+nclusters     = config.delete('nclusters') || 5
+name_mappings = File.expand_path(config.delete('name_mappings_file'), base_dir)
+traits_file   = File.expand_path(config.delete('traits_file'), base_dir)
+traits_col_names = (config.delete('traits') || Array.new)
+
+
+if !config.empty?
+    raise "unknown config parameters #{config}"
+end
+
+latlon =
+    if lat_col_name && lon_col_name
+        [lat_col_name, lon_col_name]
+    end
+processor = NexusProcessing.new(nclusters: nclusters)
+processor.load_traits_from_csv(traits_file, key_col_name, traits_col_names, latlon: latlon)
+if name_mappings
+    processor.load_name_mappings(name_mappings)
+end
+processor.process(nexus_file)
+
+
