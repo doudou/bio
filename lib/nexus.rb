@@ -135,7 +135,7 @@ class NexusProcessing
         io.puts "BEGIN TRAITS;"
         io.puts "  Dimensions NTRAITS=#{trait.categories.size};"
         io.puts "  Format labels=yes missing=? separator=Comma;"
-        io.puts "  TraitLabels #{trait.categories.join(",")};"
+        io.puts "  TraitLabels #{trait.categories.join(" ")};"
         io.puts "  Matrix"
         sequence_names.each do |seq_name|
             trait_value = trait.by_sequence_name[seq_name]
