@@ -42,8 +42,8 @@ class NexusProcessing
             next if !(k = row[key])
             keys << k
             if latlon
-                lat << row[latlon.first]
-                lon << row[latlon.last]
+                lat << row[latlon.first].gsub(',', '.')
+                lon << row[latlon.last].gsub(',', '.')
             end
             all_traits_names.each do |col_name|
                 traits[col_name] << row[col_name].strip.gsub(/[^\w]+/, '_')
