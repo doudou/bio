@@ -1,3 +1,6 @@
+require 'set'
+require 'matrix'
+
 class NexusProcessing
     # List of traits to be added to the nexus file
     #
@@ -16,20 +19,31 @@ class NexusProcessing
     # The number of clusters to be declared in the geotags block
     attr_accessor :nclusters
 
-    Trait = Struct.new :name, :categories, :by_sequence_name
+    Trait = Struct.new :name, :categories, :sequence_to_row, :matrix
     
     def initialize(nclusters: 5)
         @nclusters = nclusters
         @traits = Hash.new
     end
 
-    def add_trait(name, keys, trait)
-        trait_values = trait.sort_by { |v| v || "" }.uniq
-        trait_values.delete('?')
+    def add_trait(name, sequence_keys, sequence_traits)
+        categories = sequence_traits.sort_by { |v| v || "" }.uniq
+        categories.delete('?')
+        category_to_col = Hash[categories.each_with_index.map { |v, i| [v, i] }]
 
-        mapping = Hash[trait_values.each_with_index.map { |v, i| [v, i] }]
-        trait = trait.map { |v| mapping[v] }
-        traits[name] = Trait.new(name, trait_values, Hash[keys.zip(trait)])
+        sequence_keys_uniq = Set[*sequence_keys].to_a.sort
+        sequence_keys_to_row = Hash[sequence_keys_uniq.each_with_index.map { |k, i| [k, i] }]
+
+        matrix = (1..sequence_keys_uniq.size).map { [0] * categories.size }
+        sequence_keys.each_with_index do |key, i|
+            if trait = sequence_traits[i]
+                row = sequence_keys_to_row[key]
+                col = category_to_col[trait]
+                matrix[row][col] += 1
+            end
+        end
+
+        self.traits[name] = Trait.new(name, categories, sequence_keys_to_row, matrix)
     end
 
     def load_traits_from_csv(path, key, traits_names, latlon: nil)
@@ -56,7 +70,11 @@ class NexusProcessing
         end
 
         if latlon
-            @latlon = Hash[keys.zip(lat.zip(lon))]
+            @latlon = Hash.new
+            keys.each_with_index do |k,i|
+                k_latlon = (@latlon[k] ||= Hash.new(0))
+                k_latlon[[lat[i],lon[i]]] += 1
+            end
         end
     end
 
@@ -139,14 +157,8 @@ class NexusProcessing
         io.puts "  TraitLabels #{trait.categories.join(" ")};"
         io.puts "  Matrix"
         sequence_names.each do |seq_name|
-            trait_value = trait.by_sequence_name[seq_name]
-
-            if trait_value
-                trait_array[trait_value] = "1"
-                io.puts "#{sequence_key_mapping[seq_name]} #{trait_array.join(",")}"
-                trait_array[trait_value] = "0"
-            else
-                raise "no data for sequence #{seq_name}"
+            if row = trait.sequence_to_row[seq_name]
+                io.puts "#{sequence_key_mapping[seq_name]} #{trait.matrix[row].map(&:to_s).join(",")}"
             end
         end
         io.puts ";"
@@ -162,8 +174,11 @@ class NexusProcessing
         io.puts "  Matrix"
         sequence_names.each do |seq_name|
             if seq_latlon = latlon[seq_name]
-                io.puts "#{sequence_key_mapping[seq_name]} #{seq_latlon[0]},#{seq_latlon[1]},1"
+                seq_latlon.each do |(lat,lon),count|
+                    io.puts "#{sequence_key_mapping[seq_name]} #{lat},#{lon},#{count}"
+                end
             else
+                binding.pry
                 raise "no data for sequence #{seq_name}"
             end
         end

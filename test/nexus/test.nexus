@@ -1,0 +1,20 @@
+#NEXUS
+[/home/cverna/.arb_tmp/tmp/gde19576_1 -- data title]
+
+[Name: LorLacte          Len:  1159  Check: 2338B739]
+[Name: LorLact5          Len:  1159  Check: 2338B739]
+[Name: LorLact2          Len:  1159  Check:  580DE0F]
+[Name: BtlSymb2          Len:  1159  Check: DFA31037]
+[Name: LorLact3          Len:  1159  Check: 2338B739]
+
+begin data;
+ dimensions ntax=5 nchar=20;
+ format datatype=rna interleave=yes missing=. gap=-;
+  matrix
+ LorLacte  GCGUGGAAUCUGCCUAGUAG
+ LorLact5  GCGUGGAAUCUGCCUAGUAG
+ LorLact2  GCGUGGAAUCUGCCUAGUAG
+ BtlSymb2  GCGUGGAAUCUGCCUAGUAG
+ LorLact3  GCGUGGAAUCUGCCUAGUAG
+;
+  end;
