@@ -4,8 +4,6 @@ require 'nexus'
 require 'tmpdir'
 
 describe NexusProcessing do
-    subject { NexusProcessing.from_config_file(File.join(base_dir, 'test.config')) }
-
     attr_reader :base_dir
     attr_reader :output_dir
 
@@ -19,11 +17,13 @@ describe NexusProcessing do
         FileUtils.rm_rf output_dir if output_dir
     end
 
-    def assert_generate_expected(filename)
+    def assert_generate_expected(filename, prefix: '')
         full = File.expand_path(filename, output_dir)
-        expected = File.join(base_dir, 'expected', filename)
+        expected = File.join(base_dir, 'expected', "#{prefix}#{filename}")
         assert_equal File.read(expected), File.read(full)
     end
+
+    subject { NexusProcessing.from_config_file(File.join(base_dir, 'test.config')) }
 
     describe ".default_rename_output_path" do
         it "inserts .renamed. between the basename and the extension" do
@@ -62,5 +62,29 @@ describe NexusProcessing do
             assert_generate_expected 'geotags.csv'
         end
 
+        describe "without geotags" do
+            subject { NexusProcessing.from_config_file(File.join(base_dir, 'test-nogeotags.config')) }
+
+            it "does not require the geotags" do
+                subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
+                assert_generate_expected 'habitat.nex'
+                assert_generate_expected 'habitat.csv'
+                assert !File.exists?(File.join(output_dir, 'geotags.nex'))
+                assert !File.exists?(File.join(output_dir, 'geotags.csv'))
+            end
+        end
+
+        describe "without renaming" do
+            subject { NexusProcessing.from_config_file(File.join(base_dir, 'test-norename.config')) }
+
+            it "does not require to rename" do
+                subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
+                assert_generate_expected 'habitat.nex', prefix: 'norename-'
+                assert_generate_expected 'habitat.csv', prefix: 'norename-'
+                assert_generate_expected 'geotags.nex', prefix: 'norename-'
+                assert_generate_expected 'geotags.csv', prefix: 'norename-'
+            end
+        end
     end
 end
+

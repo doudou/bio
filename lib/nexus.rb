@@ -2,6 +2,7 @@ require 'set'
 require 'matrix'
 require 'yaml'
 require 'csv'
+require 'fileutils'
 
 class NexusProcessing
     # List of traits to be added to the nexus file
@@ -30,7 +31,10 @@ class NexusProcessing
         lat_col_name  = config.delete('lat')
         lon_col_name  = config.delete('lon')
         nclusters     = config.delete('nclusters') || 5
-        name_mappings = File.expand_path(config.delete('name_mappings_file'), base_dir)
+        name_mappings = config.delete('name_mappings_file')
+        if name_mappings
+            name_mappings = File.expand_path(name_mappings, base_dir)
+        end
         traits_file   = File.expand_path(config.delete('traits_file'), base_dir)
         traits_col_names = (config.delete('traits') || Array.new)
         if !config.empty?
@@ -116,8 +120,10 @@ class NexusProcessing
     end
 
     def process_sequence_renames(io, path)
-        max_key_size = sequence_key_mapping.values.map(&:size).max
-        name_format = "%-#{max_key_size}s"
+        if sequence_key_mapping
+            max_key_size = sequence_key_mapping.values.map(&:size).max
+            name_format = "%-#{max_key_size}s"
+        end
 
         in_data_block, in_data_matrix = false
         sequence_names = Array.new
@@ -191,9 +197,11 @@ class NexusProcessing
         end
 
         # And if we have lat/lon, make a geotag block
-        File.open(File.join(output_dir, "geotags.nex"), 'w') do |io|
-            io.puts base_file.string
-            make_geotags_block(io, sequence_names)
+        if latlon
+            File.open(File.join(output_dir, "geotags.nex"), 'w') do |io|
+                io.puts base_file.string
+                make_geotags_block(io, sequence_names)
+            end
             File.open(File.join(output_dir, "geotags.csv"), 'w') do |io|
                 make_geotags_csv(io, sequence_names)
             end
