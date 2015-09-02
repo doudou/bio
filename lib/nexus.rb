@@ -1,5 +1,7 @@
 require 'set'
 require 'matrix'
+require 'yaml'
+require 'csv'
 
 class NexusProcessing
     # List of traits to be added to the nexus file
@@ -20,7 +22,33 @@ class NexusProcessing
     attr_accessor :nclusters
 
     Trait = Struct.new :name, :categories, :sequence_to_row, :matrix
-    
+
+    def self.from_config_file(config_path)
+        config = YAML.load(File.read(config_path))
+        base_dir = File.dirname(config_path)
+        key_col_name  = config.delete('key')
+        lat_col_name  = config.delete('lat')
+        lon_col_name  = config.delete('lon')
+        nclusters     = config.delete('nclusters') || 5
+        name_mappings = File.expand_path(config.delete('name_mappings_file'), base_dir)
+        traits_file   = File.expand_path(config.delete('traits_file'), base_dir)
+        traits_col_names = (config.delete('traits') || Array.new)
+        if !config.empty?
+            raise "unknown config parameters #{config}"
+        end
+
+        latlon =
+            if lat_col_name && lon_col_name
+                [lat_col_name, lon_col_name]
+            end
+        processor = NexusProcessing.new(nclusters: nclusters)
+        processor.load_traits_from_csv(traits_file, key_col_name, traits_col_names, latlon: latlon)
+        if name_mappings
+            processor.load_name_mappings(name_mappings)
+        end
+        processor
+    end
+
     def initialize(nclusters: 5)
         @nclusters = nclusters
         @traits = Hash.new
@@ -87,61 +115,66 @@ class NexusProcessing
         @sequence_key_mapping = mapping
     end
 
-    def process(path)
+    def process_sequence_renames(io, path)
         max_key_size = sequence_key_mapping.values.map(&:size).max
         name_format = "%-#{max_key_size}s"
 
         in_data_block, in_data_matrix = false
-        base_file = StringIO.new
         sequence_names = Array.new
         File.readlines(path).each do |line|
             if line =~ /\[Name: (\w+)(.*)/
                 name, remainder = $1, $2
                 sequence_names << name
                 if !sequence_key_mapping
-                    base_file.print line
+                    io.print line
                 elsif mapped_name = sequence_key_mapping[name]
                     mapped_name = name_format % [mapped_name]
-                    base_file.puts "[Name: #{mapped_name}#{remainder}"
+                    io.puts "[Name: #{mapped_name}#{remainder}"
                 else
                     raise "no mapping for name #{name}"
                 end
             elsif in_data_matrix && line =~ /^ (\w+)(\s+.*)/
                 name, remainder = $1, $2
                 if !sequence_key_mapping
-                    base_file.print line
+                    io.print line
                 elsif mapped_name = sequence_key_mapping[name]
                     mapped_name = name_format % [mapped_name]
-                    base_file.puts " #{mapped_name}#{remainder}"
+                    io.puts " #{mapped_name}#{remainder}"
                 else
                     raise "no mapping for name '#{name}'"
                 end
             elsif in_data_block && line.downcase.strip == "matrix"
                 in_data_matrix = true
-                base_file.print line
+                io.print line
             elsif line.downcase.strip == "begin data;"
                 in_data_block = true
-                base_file.print line
+                io.print line
             elsif in_data_block && line.downcase.strip == "end;"
                 in_data_block, in_data_matrix = false
-                base_file.print line
+                io.print line
             else
-                base_file.print line
+                io.print line
             end
         end
+        sequence_names
+    end
 
-        dirname = path.gsub(/\.nex(?:us)?$/, '')
-        FileUtils.mkdir_p dirname
+    def process(path, output_dir: nil)
+        base_file = StringIO.new
+        sequence_names = process_sequence_renames(base_file, path)
+
+        output_dir ||= path.gsub(/\.nex(?:us)?$/, '')
+        FileUtils.mkdir_p output_dir
         # Add annotation blocks for the traits
         traits.each_value do |trait|
-            File.open(File.join(dirname, "#{trait.name}.nex"), 'w') do |io|
+            File.open(File.join(output_dir, "#{trait.name}.nex"), 'w') do |io|
                 io.puts base_file.string
                 make_trait_block(io, trait, sequence_names)
             end
         end
 
         # And if we have lat/lon, make a geotag block
-        File.open(File.join(dirname, "geotags.nex"), 'w') do |io|
+        File.open(File.join(output_dir, "geotags.nex"), 'w') do |io|
             io.puts base_file.string
             make_geotags_block(io, sequence_names)
         end
