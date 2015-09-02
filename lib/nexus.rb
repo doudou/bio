@@ -203,7 +203,6 @@ class NexusProcessing
     def make_trait_block(io, trait, sequence_names)
         sequence_key_mapping = (self.sequence_key_mapping || ->(k) { k })
 
-        trait_array = ["0"] * trait.categories.size
         io.puts "BEGIN TRAITS;"
         io.puts "  Dimensions NTRAITS=#{trait.categories.size};"
         io.puts "  Format labels=yes missing=? separator=Comma;"
@@ -241,7 +240,6 @@ class NexusProcessing
                     io.puts "#{sequence_key_mapping[seq_name]} #{lat},#{lon},#{count}"
                 end
             else
-                binding.pry
                 raise "no data for sequence #{seq_name}"
             end
         end
