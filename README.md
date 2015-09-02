@@ -1,6 +1,8 @@
-= Tools to post-process NEXUS files (and some other related tools)
+Tools to post-process NEXUS files (and some other related stuff)
+================================
 
-== Renaming of sequences within NEXUS files
+Renaming of sequences within NEXUS files
+-------------
 
 The tool can be given a nexus file and a file that gives a mapping from sequence
 names (as found in the input file) to the names that should be used in the
@@ -16,7 +18,8 @@ nexus --rename input.nex names.nds
 will generate a file called `input.renamed.nex` which is the input nexus files
 with the specified renaming applied
 
-== Addition of traits into NEXUS files
+Addition of traits into NEXUS files
+-------------
 
 The tool can generate a bunch of NEXUS files post processed with the addition of
 trait and/or geotag blocks. It must be given a nexus file and a configuration
@@ -28,7 +31,7 @@ file. Additionally, two other files must be provided:
 The configuration file points to these two as well as to other information.
 Example:
 
-~~~
+~~~ yaml
 traits_file: path_to_csv_file.csv
 name_mappings_file: path_to_name_mapping_file.nds
 
