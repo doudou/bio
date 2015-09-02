@@ -185,12 +185,18 @@ class NexusProcessing
                 io.puts base_file.string
                 make_trait_block(io, trait, sequence_names)
             end
+            File.open(File.join(output_dir, "#{trait.name}.csv"), 'w') do |io|
+                make_trait_csv(io, trait, sequence_names)
+            end
         end
 
         # And if we have lat/lon, make a geotag block
         File.open(File.join(output_dir, "geotags.nex"), 'w') do |io|
             io.puts base_file.string
             make_geotags_block(io, sequence_names)
+            File.open(File.join(output_dir, "geotags.csv"), 'w') do |io|
+                make_geotags_csv(io, sequence_names)
+            end
         end
     end
 
@@ -212,6 +218,16 @@ class NexusProcessing
         io.puts "END;"
     end
 
+    def make_trait_csv(io, trait, sequence_names)
+        sequence_key_mapping = (self.sequence_key_mapping || ->(k) { k })
+        io.puts "name,#{trait.categories.join(",")}"
+        sequence_names.each do |seq_name|
+            if row = trait.sequence_to_row[seq_name]
+                io.puts "#{sequence_key_mapping[seq_name]},#{trait.matrix[row].map(&:to_s).join(",")}"
+            end
+        end
+    end
+
     def make_geotags_block(io, sequence_names)
         sequence_key_mapping = (self.sequence_key_mapping || ->(k) { k })
 
@@ -231,6 +247,21 @@ class NexusProcessing
         end
         io.puts ";"
         io.puts "END;"
+    end
+
+    def make_geotags_csv(io, sequence_names)
+        sequence_key_mapping = (self.sequence_key_mapping || ->(k) { k })
+
+        io.puts "name,latitude,longitude,count"
+        sequence_names.each do |seq_name|
+            if seq_latlon = latlon[seq_name]
+                seq_latlon.each do |(lat,lon),count|
+                    io.puts "#{sequence_key_mapping[seq_name]},#{lat},#{lon},#{count}"
+                end
+            else
+                raise "no data for sequence #{seq_name}"
+            end
+        end
     end
 end
 

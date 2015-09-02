@@ -42,14 +42,25 @@ describe NexusProcessing do
     end
 
     describe "#process" do
-        it "generates one file per trait" do
+        it "generates one nexus file per trait" do
             subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
             assert_generate_expected 'habitat.nex'
         end
 
-        it "generates one file for the geotags" do
+        it "generates one csv file per trait" do
+            subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
+            assert_generate_expected 'habitat.csv'
+        end
+
+        it "generates one nexus file for the geotags" do
             subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
             assert_generate_expected 'geotags.nex'
         end
+
+        it "generates one csv file for the geotags" do
+            subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
+            assert_generate_expected 'geotags.csv'
+        end
+
     end
 end
