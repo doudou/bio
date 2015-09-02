@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby
 
 require 'nexus'
+require 'optparse'
 
 # Config file:
 #
@@ -13,14 +14,28 @@ require 'nexus'
 
 if ARGV.empty?
     puts "nexus NEXUS_FILE CONFIG_FILE"
+    puts "nexus NEXUS_FILE --rename NAME_MAPPING_FILE"
     exit 0
 end
 
-nexus_file  = ARGV.shift
-config_path = ARGV.shift
-
-
+rename_mode = false
+options = OptionParser.new do |opt|
+    opt.on '--rename' do
+        rename_mode = true
     end
+end
+nexus_file, config_path = options.parse(ARGV)
+
+if rename_mode
+    processor = NexusProcessing.new
+    processor.load_name_mappings(config_path)
+
+    input_ext = File.extname(nexus_file)
+    output_basename = File.basename(nexus_file, input_ext)
+    File.open(File.join(File.dirname(nexus_file), "#{output_basename}.renamed.#{input_ext}"), 'w') do |io|
+        processor.process_sequence_renames(io, nexus_file)
+    end
+else
     processor = NexusProcessing.from_config_file(config_path)
     processor.process(nexus_file)
 end

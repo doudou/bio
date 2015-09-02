@@ -1,0 +1,20 @@
+#NEXUS
+[/home/cverna/.arb_tmp/tmp/gde19576_1 -- data title]
+
+[Name: Test_1          Len:  1159  Check: 2338B739]
+[Name: Test_2          Len:  1159  Check: 2338B739]
+[Name: Test_3          Len:  1159  Check:  580DE0F]
+[Name: Test_4          Len:  1159  Check: DFA31037]
+[Name: Test_5          Len:  1159  Check: 2338B739]
+
+begin data;
+ dimensions ntax=5 nchar=20;
+ format datatype=rna interleave=yes missing=. gap=-;
+  matrix
+ Test_1  GCGUGGAAUCUGCCUAGUAG
+ Test_2  GCGUGGAAUCUGCCUAGUAG
+ Test_3  GCGUGGAAUCUGCCUAGUAG
+ Test_4  GCGUGGAAUCUGCCUAGUAG
+ Test_5  GCGUGGAAUCUGCCUAGUAG
+;
+  end;

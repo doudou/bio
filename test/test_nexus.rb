@@ -25,6 +25,22 @@ describe NexusProcessing do
         assert_equal File.read(expected), File.read(full)
     end
 
+    describe ".default_rename_output_path" do
+        it "inserts .renamed. between the basename and the extension" do
+            assert_equal "a/nexus/file.renamed.nex",
+                NexusProcessing.default_rename_output_path("a/nexus/file.nex")
+        end
+    end
+
+    describe "#perform_sequence_renames" do
+        it "generates a new file with the renamed sequences" do
+            subject.perform_sequence_renames(File.join(base_dir, 'test.nexus'),
+                                             File.join(base_dir, 'test.nds'),
+                                             output: File.join(output_dir, 'test.renamed'))
+            assert_generate_expected 'test.renamed'
+        end
+    end
+
     describe "#process" do
         it "generates one file per trait" do
             subject.process(File.join(base_dir, 'test.nexus'), output_dir: output_dir)
