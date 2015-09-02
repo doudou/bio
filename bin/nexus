@@ -28,13 +28,7 @@ nexus_file, config_path = options.parse(ARGV)
 
 if rename_mode
     processor = NexusProcessing.new
-    processor.load_name_mappings(config_path)
-
-    input_ext = File.extname(nexus_file)
-    output_basename = File.basename(nexus_file, input_ext)
-    File.open(File.join(File.dirname(nexus_file), "#{output_basename}.renamed.#{input_ext}"), 'w') do |io|
-        processor.process_sequence_renames(io, nexus_file)
-    end
+    processor.perform_sequence_renames(nexus_file, config_path)
 else
     processor = NexusProcessing.from_config_file(config_path)
     processor.process(nexus_file)
