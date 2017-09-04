@@ -3,8 +3,9 @@ require 'matrix'
 require 'yaml'
 require 'csv'
 require 'fileutils'
+require_relative 'processor'
 
-class NexusProcessing
+class NexusProcessing < Processor
     # List of traits to be added to the nexus file
     #
     # @return [Hash<String,Trait>]
@@ -110,15 +111,6 @@ class NexusProcessing
         end
     end
 
-    def load_name_mappings(path)
-        mapping = Hash.new
-        File.readlines(path).each do |line|
-            key, *name = line.strip.split(/\s+/)
-            mapping[key] = name.join(" ").strip.gsub(/[^\w]+/, '_')
-        end
-        @sequence_key_mapping = mapping
-    end
-
     def process_sequence_renames(io, path)
         if sequence_key_mapping
             max_key_size = sequence_key_mapping.values.map(&:size).max
@@ -163,20 +155,6 @@ class NexusProcessing
             end
         end
         sequence_names
-    end
-
-    def self.default_rename_output_path(nexus_path)
-        input_ext = File.extname(nexus_path)
-        output_basename = File.basename(nexus_path, input_ext)
-        File.join(File.dirname(nexus_path), "#{output_basename}.renamed#{input_ext}")
-    end
-
-    def perform_sequence_renames(nexus_path, rename_path,
-                                 output: self.class.default_rename_output_path(nexus_path))
-        load_name_mappings(rename_path)
-        File.open(output, 'w') do |io|
-            process_sequence_renames(io, nexus_path)
-        end
     end
 
     def process(path, output_dir: nil)

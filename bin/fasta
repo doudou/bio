@@ -1,0 +1,35 @@
+#! /usr/bin/env ruby
+
+require 'fasta'
+require 'optparse'
+
+# Config file:
+#
+# key: KEY_NAME
+# [lat: LAT_NAME]
+# [long: LONG_NAME]
+# [traits:
+#   - TRAIT1_NAME
+#   - TRAIT2_NAME]
+
+if ARGV.empty?
+    puts "fasta FASTA_FILE --rename NAME_MAPPING_FILE"
+    exit 0
+end
+
+rename_mode = false
+options = OptionParser.new do |opt|
+    opt.on '--rename' do
+        rename_mode = true
+    end
+end
+fasta_file, config_path = options.parse(ARGV)
+
+if rename_mode
+    processor = FastaProcessing.new
+    processor.perform_sequence_renames(fasta_file, config_path)
+else
+    puts "Nothing to do ..."
+end
+
+
