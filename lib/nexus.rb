@@ -85,17 +85,28 @@ class NexusProcessing < Processor
         keys = Array.new
         lat  = Array.new
         lon  = Array.new
+	lat_field, long_field = *latlon
         traits = Hash[all_traits_names.map { |n| [n, Array.new] }]
-        CSV.foreach(path, headers: :first_row) do |row|
+        CSV.enum_for(:foreach, path, headers: :first_row).each_with_index do |row, row_idx|
             next if !(k = row[key])
             keys << k
-            if latlon
-                lat << row[latlon.first].gsub(',', '.')
-                lon << row[latlon.last].gsub(',', '.')
+            if lat_field && long_field
+		row_lat, row_long = row.values_at(lat_field, long_field)
+		if !row_lat
+		    raise "no latitude field '#{lat_field}' in row #{row_idx} of #{path}"
+		elsif !row_long
+		    raise "no latitude field '#{long_field}' in row #{row_idx} of #{path}"
+		end
+                lat << row_lat.gsub(',', '.')
+                lon << row_long.gsub(',', '.')
             end
             all_traits_names.each do |col_name|
-                traits[col_name] << row[col_name].strip.gsub(/[^\w]+/, '_')
-            end
+		if val = row[col_name]
+		    traits[col_name] << val.strip.gsub(/[^\w]+/, '_')
+		else
+		    raise "missing expected trait field '#{col_name}'"
+		end
+	    end
         end
 
         traits.each do |name, data|
