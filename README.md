@@ -1,4 +1,4 @@
-Tools to post-process NEXUS files (and some other related stuff)
+Tools to post-process sequence files (and some other related stuff)
 ================================
 
 Renaming of sequences within NEXUS files
@@ -17,6 +17,37 @@ nexus --rename input.nex names.nds
 
 will generate a file called `input.renamed.nex` which is the input nexus files
 with the specified renaming applied
+
+The .nds file is of the form
+
+~~~
+ Name0 new name 0
+ Name1 new name 1
+~~~
+
+Renaming of sequences within FASTA files
+-------------
+
+The tool can be given a fasta file and a file that gives a mapping from sequence
+names (as found in the input file) to the names that should be used in the
+generated FASTA files. The first word (without spaces) in each line is
+interpreted as the input name and the rest as the output name.
+
+For instance, the following command
+
+~~~
+fasta --rename input.fas names.nds
+~~~
+
+will generate a file called `input.renamed.fas` which is the input fasta file
+with the specified renaming applied.
+
+The .nds file is of the form
+
+~~~
+ Name0 new name 0
+ Name1 new name 1
+~~~
 
 Addition of traits into NEXUS files
 -------------
